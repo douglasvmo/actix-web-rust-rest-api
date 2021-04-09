@@ -14,7 +14,7 @@ pub struct Book {
     pub published: bool,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize, Serialize)]
 #[table_name = "books"]
 pub struct NewBooks {
     pub title: String,
