@@ -6,9 +6,9 @@ mod books_model;
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::resource("/books")
-            .guard(guard::fn_guard(|head| head.uri.to_string() == "/books"))
+            .guard(guard::fn_guard(|header| header.uri.query().is_none()))
             .route(web::get().to(books_handler::index))
             .route(web::post().to(books_handler::create)),
     )
-    .service(web::resource("/books").route(web::get().to(books_handler::show_by_author)));
+    .route("/books", web::get().to(books_handler::show_by_author));
 }
