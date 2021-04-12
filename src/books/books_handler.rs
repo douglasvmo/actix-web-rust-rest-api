@@ -1,5 +1,6 @@
 use super::books_model::{Book, NewBooks};
-use actix_web::{http, web, HttpRequest, HttpResponse, Responder};
+use serde::{Deserialize};
+use actix_web::{HttpRequest, HttpResponse, web};
 
 use crate::Pool;
 
@@ -14,10 +15,20 @@ pub async fn create(db: web::Data<Pool>, book: web::Json<NewBooks>) -> HttpRespo
     let conn = db.get().unwrap();
     let is_ok = Book::insert(book.into_inner(), &conn);
 
-    let status = match is_ok {
-        true => http::StatusCode::CREATED,
-        false => http::StatusCode::BAD_REQUEST,
-    };
+    match is_ok {
+        true => HttpResponse::Created().finish(),
+        false => HttpResponse::BadRequest().finish(),
+    }
+}
 
-    HttpResponse::Ok().status(status).finish()
+#[derive(Deserialize)]
+pub struct ShowByAuthor {
+    author: String,
+}
+
+pub async fn show_by_author(db: web::Data<Pool>, query: web::Query<ShowByAuthor>) -> HttpResponse {
+    let conn = db.get().unwrap();
+    let books = Book::all_by_author(query.author.clone(), &conn);
+
+    HttpResponse::Ok().json(books)
 }
