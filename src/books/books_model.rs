@@ -63,8 +63,10 @@ impl Book {
         diesel::delete(all_books.find(id)).execute(conn).is_ok()
     }
     pub fn all_by_author(author: String, conn: &PgConnection) -> Vec<Book> {
+        let pattern = format!("%{}%",author).to_lowercase();
+        
         all_books
-            .filter(books::author.eq(author))
+            .filter(books::author.ilike(pattern))
             .load::<Book>(conn)
             .expect("error loand books by author")
     }
