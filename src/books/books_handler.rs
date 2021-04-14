@@ -1,6 +1,6 @@
 use super::books_model::{Book, NewBooks};
-use serde::{Deserialize};
-use actix_web::{HttpRequest, HttpResponse, web};
+use actix_web::{web, HttpResponse};
+use serde::Deserialize;
 
 use crate::Pool;
 
@@ -31,4 +31,12 @@ pub async fn show_by_author(db: web::Data<Pool>, query: web::Query<ShowByAuthor>
     let books = Book::all_by_author(query.author.clone(), &conn);
 
     HttpResponse::Ok().json(books)
+}
+
+pub async fn show_a_book(db: web::Data<Pool>, req: web::HttpRequest) -> HttpResponse {
+    let conn = db.get().unwrap();
+    let id = req.match_info().query("id").parse::<i32>().unwrap();
+    let book = Book::show(id, &conn).pop();
+
+    HttpResponse::Ok().json(book)
 }

@@ -10,5 +10,6 @@ pub fn config(cfg: &mut web::ServiceConfig) {
             .route(web::get().to(books_handler::index))
             .route(web::post().to(books_handler::create)),
     )
-    .route("/books", web::get().to(books_handler::show_by_author));
+    .route("/books", web::get().to(books_handler::show_by_author))
+    .route("/books/{id}", web::get().to(books_handler::show_a_book));
 }
