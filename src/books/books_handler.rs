@@ -1,8 +1,8 @@
+use crate::config::Pool;
+
 use super::books_model::{Book, NewBooks};
 use actix_web::{web, HttpResponse};
 use serde::Deserialize;
-
-use crate::Pool;
 
 pub async fn index(db: web::Data<Pool>) -> HttpResponse {
     let conn = db.get().unwrap();
