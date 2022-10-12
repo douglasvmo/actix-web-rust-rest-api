@@ -1,10 +1,10 @@
 use diesel::r2d2::PooledConnection;
-use diesel::RunQueryDsl;
+use diesel::{self,RunQueryDsl};
 
 use crate::config::{Connection, Pool};
-use crate::schema::users::dsl::users as all_users;
+use crate::schema::users::dsl::*;
+use crate::schema::users;
 use serde::{Deserialize, Serialize};
-use diesel::prelude::*;
 
 #[derive(Queryable, Deserialize, Serialize)]
 pub struct User {
@@ -15,6 +15,15 @@ pub struct User {
     #[serde(skip_serializing)]
     pub password: String,
     pub active: bool,
+}
+
+#[derive(Insertable, Deserialize, Serialize)]
+#[table_name = "users"]
+pub struct  NewUser {
+    pub name: String,
+    pub email: String,
+    pub cpf: String, 
+    pub password: String, 
 }
 
 pub struct UserRepository {
@@ -28,6 +37,12 @@ impl UserRepository {
     }
 
     pub fn get_all(&self) -> Vec<User> {
-        all_users.load(&self.db).expect("error loanding  the books")
+        users.load(&self.db).expect("error loanding  the books")
+    }
+    pub fn create(&self, new_user:NewUser) -> bool {
+        diesel::insert_into(users::table)
+        .values(new_user)
+        .execute(&self.db)
+        .is_ok()
     }
 }
