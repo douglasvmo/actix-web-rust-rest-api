@@ -3,7 +3,7 @@ extern crate diesel;
 extern crate dotenv;
 
 use actix_web::{App, HttpServer};
-
+mod errors;
 mod config;
 mod schema;
 mod services;
@@ -20,6 +20,7 @@ async fn main() -> std::io::Result<()> {
             .data(pool.clone())
             .service(services::users::create)
             .service(services::users::index)
+            .service(services::users::find)
     })
     .bind("127.0.0.1:8080")?
     .run()

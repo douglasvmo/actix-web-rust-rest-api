@@ -1,20 +1,25 @@
-use crate::{config::Pool, repositories::user::NewUser};
 use crate::repositories::user::UserRepository;
-use actix_web::{web, HttpResponse, get, post};
+use crate::{config::Pool, repositories::user::NewUser};
+use actix_web::{get, post, web, HttpResponse};
 
 #[get("/users")]
 pub async fn index(pool: web::Data<Pool>) -> HttpResponse {
-    let users = UserRepository::new(&pool).get_all();
+     UserRepository::new(&pool).get_all()
+     .map(|users|HttpResponse::Ok().json(users))
+     .into()
+}
 
-    HttpResponse::Ok().json(users)
+#[get("/users/{id}")]
+pub async fn find(pool: web::Data<Pool>, info: web::Path<i32>) -> HttpResponse {
+    UserRepository::new(&pool).find(info.0)
+    .map(|user|HttpResponse::Ok().json(user))
+    .into()
 }
 
 #[post("/users")]
 pub async fn create(pool: web::Data<Pool>, new_user: web::Json<NewUser>) -> HttpResponse {
-    let is_ok = UserRepository::new(&pool).create(new_user.into_inner());
-
-    match is_ok {
-        true => HttpResponse::Created().finish(),
-        false => HttpResponse::BadRequest().finish(),
-    }
+    UserRepository::new(&pool)
+        .create(new_user.into_inner())
+        .map(|user| HttpResponse::Created().json(user))
+        .into()
 }

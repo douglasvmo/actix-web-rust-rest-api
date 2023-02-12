@@ -1,6 +1,7 @@
 use diesel::r2d2::PooledConnection;
-use diesel::{self,RunQueryDsl};
+use diesel::{self,RunQueryDsl, QueryDsl, ExpressionMethods};
 
+use crate::errors::ServiceError;
 use crate::config::{Connection, Pool};
 use crate::schema::users::dsl::*;
 use crate::schema::users;
@@ -36,13 +37,16 @@ impl UserRepository {
         Self { db }
     }
 
-    pub fn get_all(&self) -> Vec<User> {
-        users.load(&self.db).expect("error loanding  the books")
+    pub fn get_all(&self) -> Result<Vec<User>, ServiceError> {
+        Ok(users.load(&self.db)?)
     }
-    pub fn create(&self, new_user:NewUser) -> bool {
-        diesel::insert_into(users::table)
+    pub fn find(&self, user_id: i32) -> Result<User, ServiceError> {
+        Ok(users.filter(users::id.eq(user_id)).first(&self.db)?)
+    }
+
+    pub fn create(&self, new_user:NewUser) -> Result<User, ServiceError>{
+       Ok(diesel::insert_into(users::table)
         .values(new_user)
-        .execute(&self.db)
-        .is_ok()
+        .get_result(&self.db)?)
     }
 }
