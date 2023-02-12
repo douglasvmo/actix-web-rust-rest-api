@@ -18,7 +18,8 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(pool.clone())
-            .configure(services::all_services)
+            .service(services::users::create)
+            .service(services::users::index)
     })
     .bind("127.0.0.1:8080")?
     .run()
